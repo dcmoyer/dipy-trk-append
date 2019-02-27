@@ -4,7 +4,8 @@ import struct
 import numpy as np
 
 from dipy.io.streamline import load_trk, save_trk
-    
+
+import os.path   
 
 ##
 ## takes in a streamline object and a filename,
@@ -13,9 +14,14 @@ from dipy.io.streamline import load_trk, save_trk
 ## if update_num_trk is True, we will also add the to trk header
 ##  the new number of total streamlines (assumes old number is correct).
 
-def append_to_trk( streamlines, filename, update_num_trk=False ):
+def append_to_trk(
+  streamlines,
+  filename,
+  update_num_trk=False,
+  ):
 
-  #TODO: check if file exists, if not write out like normal...
+  if not os.path.isfile(filename):
+    raise FileNotFoundError("append_to_trk called on non-existant file")
 
   print(len(streamlines[0]))
 
