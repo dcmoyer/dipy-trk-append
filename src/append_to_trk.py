@@ -23,15 +23,12 @@ def append_to_trk(
   if not os.path.isfile(filename):
     raise FileNotFoundError("append_to_trk called on non-existant file")
 
-  print(len(streamlines[0]))
-
   with open(filename, mode='r+b') as file:
     ##get header
     hdr = file.read(1000)
 
     size_idx = 1000-12
     num_trks = struct.unpack("i", hdr[size_idx:(size_idx+4)])[0]
-    #print(num_trks)
 
     if num_trks == 0 and update_num_trk:
       print("Error, num_trks set to zero, cannot update num, aborting")
@@ -44,15 +41,11 @@ def append_to_trk(
     #move to end of file
     file.seek(0,2)
 
-    #print(np.array(streamlines)[0][0])
+    #iterate through streams and output
     for stream in np.array(streamlines)[0]:
       file.write(struct.pack("i",len(stream)))
-      #print(stream[0])
-      #exit()
       for row in stream:
         file.write(struct.pack("fff",row[0],row[1],row[2]))
-      #print(len(stream))
-      #print(stream[0])
 
 
 
