@@ -42,7 +42,7 @@ def append_to_trk(
     file.seek(0,2)
 
     #iterate through streams and output
-    for stream in np.array(streamlines)[0]:
+    for stream in np.array(streamlines):
       file.write(struct.pack("i",len(stream)))
       for row in stream:
         file.write(struct.pack("fff",row[0],row[1],row[2]))
@@ -61,8 +61,9 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   streamlines = load_trk( args.test_load )
+  streamlines = list(streamlines)[0]
 
-  append_to_trk( streamlines, args.input, False)
+  append_to_trk( list(streamlines), args.input, False)
 
 
 
