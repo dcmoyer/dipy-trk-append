@@ -4,8 +4,10 @@ import struct
 import numpy as np
 
 from dipy.io.streamline import load_trk, save_trk
+from dipy.tracking import utils
 
 import os.path   
+
 
 ##
 ## takes in a streamline object and a filename,
@@ -18,10 +20,30 @@ def append_to_trk(
   streamlines,
   filename,
   update_num_trk=False,
+  vox_to_ras=None,
+  send_to_voxmm=None
   ):
 
   if not os.path.isfile(filename):
     raise FileNotFoundError("append_to_trk called on non-existant file")
+
+  if send_to_voxmm is None:
+    raise RuntimeError("append_to_trk:send_to_voxmm not set.\nsend_to_voxmm must be explicitly True or False (otherwise bad things could happen in the trk).")
+
+  if send_to_voxmm and vox_to_ras is not None:
+    #this clones behavior from 
+    ## https://github.com/nipy/dipy/blob/master/dipy/io/trackvis.py#L27
+    zooms = np.sqrt((vox_to_ras * vox_to_ras).sum(0))
+    vox_to_trk = np.diag(zooms)
+    vox_to_trk[3, 3] = 1
+    vox_to_trk[:3, 3] = zooms[:3] / 2.
+    streamlines = list(utils.move_streamlines(
+      streamlines,
+      input_space=vox_to_ras,
+      output_space=vox_to_trk
+    ))
+  elif send_to_voxmm:
+    raise RuntimeError("send_to_voxmm set, but no transform passed.")
 
   with open(filename, mode='r+b') as file:
     ##get header
@@ -63,7 +85,7 @@ if __name__ == "__main__":
   streamlines = load_trk( args.test_load )
   streamlines = list(streamlines)[0]
 
-  append_to_trk( list(streamlines), args.input, False)
+  append_to_trk( list(streamlines), args.input, False, send_to_voxmm=False)
 
 
 
